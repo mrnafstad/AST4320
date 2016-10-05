@@ -22,6 +22,9 @@ def main():
 	#Initial sigma
 	sigmasqr = 5e-5
 
+	#Boolian parameter to check wether we cross the critical density
+	crossing = False
+
 	#Array with P
 	P = np.zeros(N)
 
@@ -38,7 +41,8 @@ def main():
 
 		#Analytical solution 
 		P[i]=1/(np.sqrt(2*np.pi*newsig(Sc)))*np.exp(-delta**2/(2*newsig(Sc)))
-
+		if abs(delta) > 1.0:
+			crossing = True
 
 		Scs[i] = Sc
 		deltas[i] = delta
@@ -46,15 +50,21 @@ def main():
 		Sc = Scnew	
 		i += 1
 	
-	return deltas[i-1], Scs, P
+	return deltas[i-1], Scs, P, crossing
 
 
 deltafinal = np.zeros(N)
-for i in range(int(N)):
-	deltafinal[i], Scs, P = main()
+deltabelowcrit = np.zeros(N)
+for i in range(int(N)):	
+	deltafinal[i], Scs, P, cross = main()
+	if cross == False:
+		deltabelowcrit[i] = deltafinal[i]
 	
 plt.title(r"Histogram of $\delta$")
 plt.hist(deltafinal, bins=20)
 #plt.plot(Scs, P)
 plt.show()
 
+plt.title(r"Histogram of $\delta < \delta_{crit}")
+plt.hist(deltabelowcrit, bins = 20)
+plt.show()
