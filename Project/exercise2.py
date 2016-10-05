@@ -7,7 +7,7 @@ plt.rcParams['xtick.labelsize'] = 18
 plt.rcParams['ytick.labelsize'] = 18
 
 #Number of steps
-N = 10000
+N = 100000
 
 #Change factor
 eps = 0.9
@@ -24,31 +24,25 @@ def main():
 
 	#Boolian parameter to check wether we cross the critical density
 	crossing = False
-
-
 	
 	Sc = (np.pi/sigmasqr)**(1./4)
-	Scs = np.zeros(N)
 	delta = np.random.normal(0, sigmasqr)
 	deltas = np.zeros(N)
 
 	i=0
 	while Sc>=1:
 		Scnew = Sc*eps
-		beta = np.random.normal(0, abs(newsig(Scnew) - newsig(Sc)))
+		beta = np.random.normal(0, newsig(Scnew) - newsig(Sc))
 		delta += beta
-
 		
-		if abs(delta) > 1.0:
+		if delta > 1.0:
 			crossing = True
 
-		Scs[i] = Sc
 		deltas[i] = delta
 
 		Sc = Scnew	
 		i += 1
-	
-	return deltas[i-1], crossing
+	return delta, crossing
 
 P = np.zeros(N)
 Pcr = np.zeros(N)
@@ -61,7 +55,7 @@ for i in range(int(N)):
 		
 
 delta = np.linspace(min(deltafinal), max(deltafinal), N)
-delt = np.linspace(-1, 1, N)
+delt = np.linspace(min(deltafinal),max(deltafinal), N)
 for i in range(N):
 	P[i]=1/(np.sqrt(2)*np.pi)*np.exp(-delta[i]**2/(2*np.sqrt(np.pi)))
 	Pcr[i]=1/(np.sqrt(2)*np.pi)*(np.exp(-delt[i]**2/(2*np.sqrt(np.pi))) - np.exp(-(2 -delt[i])**2/(2*np.sqrt(np.pi))))
@@ -76,6 +70,6 @@ plt.plot(delta, P)
 plt.show()
 
 plt.title(r"Histogram of $\delta < \delta_{crit}$")
-plt.hist(deltabelowcrit, bins = 20, normed = True)
+plt.hist(deltabelowcrit, bins = 100, normed = True)
 plt.plot(delt, Pcr)
 plt.show()
