@@ -38,7 +38,7 @@ for i in range(int(N)):
 	delta[i+1] = delta[i] + beta
 
 	#Analytical solution 
-	P[i]=1/(np.sqrt(2*np.pi*newsig(M)))*np.exp(-delta[i]**2/(2*newsig(M))
+	P[i]=1/(np.sqrt(2*np.pi*newsig(Scs[i])))*np.exp(-delta[i]**2/(2*newsig(Mcs[i]))
 
 	#Break if Sc = 1
 	if Scs[i] <= 1.0:
@@ -50,6 +50,7 @@ plt.show()
 
 plt.title(r"Histogram of $\delta$")
 plt.hist(delta)
+plt.plot(Scs, P)
 plt.show()
 
 
