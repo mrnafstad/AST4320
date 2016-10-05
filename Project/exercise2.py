@@ -54,12 +54,12 @@ def main():
 
 
 deltafinal = np.zeros(N)
-deltabelowcrit = np.zeros(N)
+deltabelowcrit = []
 for i in range(int(N)):	
 	deltafinal[i], Scs, P, cross = main()
 	if cross == False:
-		deltabelowcrit[i] = deltafinal[i]
-	
+		deltabelowcrit.append(deltafinal[i])
+deltabelowcrit = np.array(deltabelowcrit)
 plt.title(r"Histogram of $\delta$")
 plt.hist(deltafinal, bins=20)
 #plt.plot(Scs, P)
