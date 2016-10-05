@@ -7,13 +7,11 @@ plt.rcParams['xtick.labelsize'] = 18
 plt.rcParams['ytick.labelsize'] = 18
 
 #Number of steps
-N = 1e5
+N = 10000
 
 #Change factor
-eps = 0.99
+eps = 0.9
 
-#array with final deltas
-deltafinal = np.zeros(N)
 
 #Sigma^2
 def newsig(Sc):
@@ -24,44 +22,39 @@ def main():
 	#Initial sigma
 	sigmasqr = 5e-5
 
-	#Array with Sc
-	Scs = np.zeros(N)
-	Scs[0] = (np.pi/sigmasqr)**(1./4)
-
-	mean = 0
-	#Array with deltas	
-	delta = np.zeros(N)
-	delta[0] = np.random.normal(mean, sigmasqr)
-
 	#Array with P
 	P = np.zeros(N)
 
-	for i in range(int(N)):
+	i=0
+	Sc = (np.pi/sigmasqr)**(1./4)
+	Scs = np.zeros(N)
+	delta = np.random.normal(0, sigmasqr)
+	deltas = np.zeros(N)
 
-		Scs[i+1] = Scs[i]*eps
-		sigmasqr = newsig(Scs[i+1])
-		beta = np.random.normal(mean, abs(newsig(Scs[i]) - newsig(Scs[i+1])))
-		delta[i+1] = delta[i] + beta
+	while Sc>=1:
+		Scnew = Sc*eps
+		beta = np.random.normal(0, newsig(Scnew) - newsig(Sc))
+		delta += beta
 
 		#Analytical solution 
-		P[i]=1/(np.sqrt(2*np.pi*newsig(Scs[i])))*np.exp(-delta[i]**2/(2*newsig(Scs[i])))
+		P[i]=1/(np.sqrt(2*np.pi*newsig(Sc)))*np.exp(-delta**2/(2*newsig(Sc)))
 
-		#Break if Sc = 1
-		if Scs[i] <= 1.0:
-			break
-	"""
-	plt.title("Random walk")	
-	plt.plot(Scs, delta)
-	plt.show()
-	"""
-	return delta[-1]
 
+		Scs[i] = Sc
+		deltas[i] = delta
+
+		Sc = Scnew	
+		i += 1
+	
+	return deltas[i-1], Scs, P
+
+
+deltafinal = np.zeros(N)
 for i in range(int(N)):
-	deltafinal[i] = main()
-
+	deltafinal[i], Scs, P = main()
+	
 plt.title(r"Histogram of $\delta$")
-plt.hist(deltafinal)
-plt.plot(Scs, P)
+plt.hist(deltafinal, bins=20)
+#plt.plot(Scs, P)
 plt.show()
-
 
