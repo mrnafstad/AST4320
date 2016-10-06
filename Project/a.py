@@ -2,9 +2,10 @@
 
 import numpy as np
 import matplotlib.pyplot as mpl
+from scipy.interpolate import UnivariateSpline
 
-#mpl.rc('font', **{'family': 'serif', ['Computer Modern']})
-#mpl.rc('text', usetex=True)
+mpl.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+mpl.rc('text', usetex=True)
 mpl.rcParams['xtick.labelsize'] = 18
 mpl.rcParams['ytick.labelsize'] = 18
 
@@ -18,7 +19,7 @@ def check(x_i):
 	else:
 		return 0.0
 
-x = np.linspace(-50*R, 50*R, N)
+x = np.linspace(-15*R, 15*R, N)
 W = np.zeros(N)
 W_f = np.zeros(N)
 k = x
@@ -28,13 +29,16 @@ for i in range(N):
 
 #main
 
-x_f = np.fft.fft(x)
 W_f = np.sin(2.0*R*k)/(2.0*np.pi*k) 
 
-k = np.max(W_f)
-r1 = np.argmin(np.abs(W_f[:N/2.]-0.5*k))
-r2 = np.argmin(np.abs(W_f[N/2.:]-0.5*k))
+spline = UnivariateSpline(x, W_f-max(W_f)/2, s=0)
+r1, r2 = spline.roots() # find the roots
 
+mpl.title(r'$\tilde{W}(k)$ with FWHM marked', size=18)
 mpl.plot(x, W_f)
-mpl.axvspan(r1, r2, facecolor='g', alpha=0.5)
+mpl.axvspan(r1,r2, facecolor='g', alpha=0.5)
+mpl.grid('on')
+mpl.ylabel(r'$\tilde{W}_f$', size=18)
+mpl.xlabel(r'$k$', size=18)
+mpl.savefig('wk')
 mpl.show()
