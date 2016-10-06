@@ -63,7 +63,7 @@ plt.plot(delta_analytic, P,'-o')
 plt.grid('on')
 plt.xlabel(r'$\delta$', size=18)
 plt.legend(['analytical','Numerical Histogram'])
-
+plt.savefig('lastdeltahist')
 plt.show()
 
 # For elements crossing critical delta
@@ -73,7 +73,7 @@ delta_analytic = np.linspace(min(delta_below_crit),max(delta_below_crit),N)
 Pnc = 1.0/np.sqrt(2.0*np.pi*newsig(Sc))*(np.exp(-delta_analytic**2/(2.0*newsig(Sc)))-np.exp(-(2.0 - delta_analytic)**2/(2*newsig(Sc))))
 
 #Normalizing
-normPnc = Pnc*2.1
+normPnc = Pnc*2.
 
 
 plt.hist(delta_below_crit, bins = 100, normed = True)
