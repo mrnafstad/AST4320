@@ -6,12 +6,6 @@ plt.rc('text', usetex=True)
 plt.rcParams['xtick.labelsize'] = 18
 plt.rcParams['ytick.labelsize'] = 18
 
-#Number of steps
-N = 100000
-
-#Change factor
-eps = 0.9
-
 
 #Sigma^2
 def newsig(Sc):
@@ -24,52 +18,70 @@ def main():
 
 	#Boolian parameter to check wether we cross the critical density
 	crossing = False
-	
-	Sc = (np.pi/sigmasqr)**(1./4)
-	delta = np.random.normal(0, sigmasqr)
-	deltas = np.zeros(N)
 
-	i=0
+	Sc = (np.pi/sigmasqr)**(1./4.)
+	delta = np.random.normal(loc=0.0, scale=np.sqrt(sigmasqr))
 	while Sc>=1:
 		Scnew = Sc*eps
-		beta = np.random.normal(0, newsig(Scnew) - newsig(Sc))
+		beta = np.random.normal(loc=0.0, scale=np.sqrt(newsig(Scnew)-newsig(Sc)))
 		delta += beta
-		
+		Sc = Scnew	
+
 		if delta > 1.0:
 			crossing = True
 
-		deltas[i] = delta
-
-		Sc = Scnew	
-		i += 1
 	return delta, crossing
 
-P = np.zeros(N)
-Pcr = np.zeros(N)
-deltafinal = np.zeros(N)
-deltabelowcrit = []
+
+#Number of steps
+N = 100000
+
+#Change factor
+eps = 0.99
+
+#-----------Numerical solution-------------
+delta_last_element = np.zeros(N)
+delta_below_crit = []
 for i in range(int(N)):	
-	deltafinal[i], cross = main()
+	delta_last_element[i], cross = main()
+
+	#Saving elements that cross critical delta
 	if cross == False:
-		deltabelowcrit.append(deltafinal[i])
+		delta_below_crit.append(delta_last_element[i])
 		
+delta_below_crit = np.array(delta_below_crit)
 
-delta = np.linspace(min(deltafinal), max(deltafinal), N)
-delt = np.linspace(min(deltafinal),max(deltafinal), N)
-for i in range(N):
-	P[i]=1/(np.sqrt(2)*np.pi)*np.exp(-delta[i]**2/(2*np.sqrt(np.pi)))
-	Pcr[i]=1/(np.sqrt(2)*np.pi)*(np.exp(-delt[i]**2/(2*np.sqrt(np.pi))) - np.exp(-(2 -delt[i])**2/(2*np.sqrt(np.pi))))
-
-deltabelowcrit = np.array(deltabelowcrit)
-
+#-----------Exact Solution-------------
+# for all elements
+Sc=1
+delta_analytic = np.linspace(min(delta_last_element),max(delta_last_element),N)
+P=1.0/np.sqrt(2.0*np.pi*newsig(Sc))*np.exp(-delta_analytic**2/(2.0*newsig(Sc)))
 
 plt.title(r"Histogram of $\delta$")
+plt.hist(delta_last_element, bins=100, normed=True)
+plt.plot(delta_analytic, P,'-o')
+plt.grid('on')
+plt.xlabel(r'$\delta$', size=18)
+plt.legend(['analytical','Numerical Histogram'])
 
-plt.hist(deltafinal, bins=100, normed=True)
-plt.plot(delta, P)
 plt.show()
 
+# For elements crossing critical delta
+N=len(delta_below_crit)
+delta_analytic = np.linspace(min(delta_below_crit),max(delta_below_crit),N)
+
+Pnc = 1.0/np.sqrt(2.0*np.pi*newsig(Sc))*(np.exp(-delta_analytic**2/(2.0*newsig(Sc)))-np.exp(-(2.0 - delta_analytic)**2/(2*newsig(Sc))))
+
+#Normalizing
+normPnc = Pnc*2.1
+
+
+plt.hist(delta_below_crit, bins = 100, normed = True)
+plt.plot(delta_analytic, normPnc,'-o')
+plt.grid('on')
+plt.xlabel(r'$\delta$', size=18)
+plt.legend(['analytical','Numerical Histogram'])
 plt.title(r"Histogram of $\delta < \delta_{crit}$")
-plt.hist(deltabelowcrit, bins = 100, normed = True)
-plt.plot(delt, Pcr)
+plt.savefig('belowcrithist')
 plt.show()
+
